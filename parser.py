@@ -1,6 +1,5 @@
 import requests
 import json
-from lxml import html
 from bs4 import BeautifulSoup
 
 class serial:
