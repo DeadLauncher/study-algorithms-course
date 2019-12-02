@@ -65,10 +65,31 @@ if __name__ == "__main__":
                 new_serial.genres_ids.append(genres.index(content[k].text)+1)
         new_serial.desc = soup.find('p',{'class':'body_large summary'}).text
         serials.append(new_serial)
-
+        header = BeautifulSoup(str(soup.find('div',{'class':'content-widget-1'})))
+        content = header.div.contents
+        new_serial.channel_id = content[9].text
+        if content[9] not in channels:
+            channels.append(content[9].text)
+        new_serial.channel_id = channels.index(content[9].text)+1
+        if content[5] not in statuses:
+            statuses.append(content[5].text)
+        new_serial.status_id = statuses.index(content[5].text)+1
+        new_serial.rating = soup.find('div',{'id':'ratStat'}).text
+        header = BeautifulSoup(str(soup.find('td',{'id':'img_basic'})))
+        new_serial.thumb = header.td.img.attrs['src']
+        print(i,'/',count)
     for i in range(len(genres)):
         print(i+1,genres[i])
+    for i in range(len(statuses)):
+        print(i+1,statuses[i])
+    for i in range(len(channels)):
+        print(i+1,channels[i])
     for i in serials:
         print(i.tittle,"(",i.original,")")
-        print(i.genres_ids,i.timing)
+        print('Длительность:',i.timing)
+        print('Жанры:',i.genres_ids)
         print(i.desc)
+        print("Статус:",statuses[i.status_id-1])
+        print(i.channel_id)
+        print(i.rating)
+        print(i.thumb)
