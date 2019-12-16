@@ -6,11 +6,6 @@ def space_remove(string):
         string = string[1:]
     return string
 
-def get_key(d, value):
-    for k, v in d.items():
-        if v == value:
-            return k
-
 def make_dict(l):
     return {str(l.index(v)+1):v for v in l}
 
