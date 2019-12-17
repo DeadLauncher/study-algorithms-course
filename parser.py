@@ -19,8 +19,8 @@ if __name__ == "__main__":
     seasons = []
     episodes = []
     genres = []
-    authors = ['Нет данных']
-    actors = ['Нет данных']
+    authors = []
+    actors = []
     statuses = []
     channels = []
     print('Number of pages: ')
@@ -77,9 +77,7 @@ if __name__ == "__main__":
         new_serial['rating'] = BeautifulSoup(str(soup.find('meta',{'itemprop':'ratingValue'})),'lxml').meta['content']
         header = BeautifulSoup(str(soup.find('td',{'id':'img_basic'})),'lxml')
         new_serial['thumb'] = header.td.img.attrs['src']
-        
         serials.append(new_serial)
-
         header = BeautifulSoup(str(''.join(list(map(str,soup.findAll('div',{'id':'full-season'}))))),'lxml')
         s = header.div
         while True:
