@@ -23,22 +23,22 @@ if __name__ == "__main__":
     actors = []
     statuses = []
     channels = []
-    print('Number of pages: ')
+    print('Number of pages:',end=' ')
     count = int(input())
     print('Parsing...')
     for i in range(1,count+1):
-        request = requests.get("https://www.toramp.com/schedule.php?id="+str(i))
-        request = request.text
-        soup = BeautifulSoup(request,'lxml')
-        header = soup.find('h1', {'class': 'title-basic'})
-        if header == None:
+        html1 = requests.get("https://www.toramp.com/schedule.php?id="+str(i))
+        html1 = html1.text
+        soup1 = BeautifulSoup(html1,'lxml')
+        soup2 = soup1.find('h1', {'class': 'title-basic'})
+        if soup2 == None:
             continue
         new_serial = {}
         new_serial['id']= len(serials)+1
-        new_serial['tittle'] = soup.find('span', {'itemprop': 'name'}).text
-        new_serial['original'] = soup.find('span', {'itemprop': 'alternativeHeadline'}).text
-        header = BeautifulSoup(str(soup.find('div',{'class':'second-part-info'})),'lxml')
-        content = header.div.contents
+        new_serial['tittle'] = soup1.find('span', {'itemprop': 'name'}).text
+        new_serial['original'] = soup1.find('span', {'itemprop': 'alternativeHeadline'}).text
+        soup2 = BeautifulSoup(str(soup1.find('div',{'class':'second-part-info'})),'lxml')
+        content = soup2.div.contents
         new_serial['genres_ids'] = []
         for k in range(1,len(content)):
             if content[k].name == None:
@@ -47,16 +47,16 @@ if __name__ == "__main__":
                 if content[k].text not in genres:
                     genres.append(content[k].text.strip())
                 new_serial['genres_ids'].append(genres.index(content[k].text)+1)
-        new_serial['desc'] = soup.find('p',{'class':'body_large summary'}).text
-        header = BeautifulSoup(str(soup.find('div',{'class':'content-widget-1'})),'lxml')
-        content = header.div.contents
-        info2 = BeautifulSoup(str(header.find('a')),'lxml')
+        new_serial['desc'] = soup1.find('p',{'class':'body_large summary'}).text
+        soup2 = BeautifulSoup(str(soup1.find('div',{'class':'content-widget-1'})),'lxml')
+        content = soup2.div.contents
+        soup2 = BeautifulSoup(str(soup2.find('a')),'lxml')
         new_serial['authors_ids'] = []
         new_serial['actors_ids'] = []
-        if info2.a != None:
-            html2 = requests.get("https://www.toramp.com/"+info2.a.attrs['href'])
-            soup1 = BeautifulSoup(html2.text,'lxml')
-            blocks = soup1.findAll('div',{'class':'block_list'},'lxml')
+        if soup2.a != None:
+            html2 = requests.get("https://www.toramp.com/"+soup2.a.attrs['href'])
+            soup3 = BeautifulSoup(html2.text,'lxml')
+            blocks = soup3.findAll('div',{'class':'block_list'},'lxml')
             arr = space_remove(BeautifulSoup(str(blocks[1]),'lxml').text).split('\n')
             for j in arr:
                 if j not in authors:
@@ -67,19 +67,21 @@ if __name__ == "__main__":
                 if j not in actors:
                     actors.append(j.strip())
                 new_serial['actors_ids'].append(actors.index(j)+1)
-        new_serial['channel_id'] = content[9].text
-        if content[9].text not in channels:
-            channels.append(content[9].text)
-        new_serial['channel_id'] = channels.index(content[9].text)+1
+        for ch in content[9].text.split(','):
+            if ch not in channels:
+                channels.append(ch.strip())
+        new_serial['channels_ids'] = []
+        for ch in content[9].text.split(','):
+            new_serial['channels_ids'].append(channels.index(ch.strip())+1)
         if content[5].text not in statuses:
             statuses.append(content[5].text)
         new_serial['status_id'] = statuses.index(content[5].text)+1
-        new_serial['rating'] = BeautifulSoup(str(soup.find('meta',{'itemprop':'ratingValue'})),'lxml').meta['content']
-        header = BeautifulSoup(str(soup.find('td',{'id':'img_basic'})),'lxml')
-        new_serial['thumb'] = header.td.img.attrs['src']
+        new_serial['rating'] = BeautifulSoup(str(soup1.find('meta',{'itemprop':'ratingValue'})),'lxml').meta['content']
+        soup2 = BeautifulSoup(str(soup1.find('td',{'id':'img_basic'})),'lxml')
+        new_serial['thumb'] = soup2.td.img.attrs['src']
         serials.append(new_serial)
-        header = BeautifulSoup(str(''.join(list(map(str,soup.findAll('div',{'id':'full-season'}))))),'lxml')
-        s = header.div
+        soup2 = BeautifulSoup(str(''.join(list(map(str,soup1.findAll('div',{'id':'full-season'}))))),'lxml')
+        s = soup2.div
         while True:
             new_season = {}
             new_season['id'] = len(seasons)+1
