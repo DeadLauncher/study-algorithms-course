@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 def space_remove(string):
     if string[0] == " ":
         string = string[1:]
+    if string[-1] == " ":
+        string = string[:-2]
+    string = string.replace('\r','')
     return string
 
 def make_dict(l):
@@ -29,7 +32,6 @@ if __name__ == "__main__":
         soup = BeautifulSoup(request,'lxml')
         header = soup.find('h1', {'class': 'title-basic'})
         if header == None:
-            i -= 1
             continue
         new_serial = {}
         new_serial['id']= len(serials)+1
@@ -49,24 +51,21 @@ if __name__ == "__main__":
         header = BeautifulSoup(str(soup.find('div',{'class':'content-widget-1'})),'lxml')
         content = header.div.contents
         info2 = BeautifulSoup(str(header.find('a')),'lxml')
-        if info2.a == None:
-            new_serial['authors_ids'] = [1]
-            new_serial['actors_ids'] = [1]
-        else:
-            new_serial['authors_ids'] = []
-            new_serial['actors_ids'] = []
+        new_serial['authors_ids'] = []
+        new_serial['actors_ids'] = []
+        if info2.a != None:
             html2 = requests.get("https://www.toramp.com/"+info2.a.attrs['href'])
             soup1 = BeautifulSoup(html2.text,'lxml')
             blocks = soup1.findAll('div',{'class':'block_list'},'lxml')
             arr = space_remove(BeautifulSoup(str(blocks[1]),'lxml').text).split('\n')
             for j in arr:
                 if j not in authors:
-                    authors.append(j)
+                    authors.append(j.strip())
                 new_serial['authors_ids'].append(authors.index(j)+1)
             arr = space_remove(BeautifulSoup(str(blocks[2]),'lxml').text).split('\n')
             for j in arr:
                 if j not in actors:
-                    actors.append(j)
+                    actors.append(j.strip())
                 new_serial['actors_ids'].append(actors.index(j)+1)
         new_serial['channel_id'] = content[9].text
         if content[9].text not in channels:
@@ -93,13 +92,13 @@ if __name__ == "__main__":
                 new_episode = {}
                 new_episode['id'] = len(episodes)+1
                 new_episode['season_id'] = len(seasons)
-                new_episode['number'] = n.a.span.text
-                new_episode['tittle'] = n.td.nextSibling.b.text
+                new_episode['number'] = n.a.span.text.strip()
+                new_episode['tittle'] = n.td.nextSibling.b.text.strip()
                 if n.td.nextSibling.span == None:
                     new_episode['original'] = ''
                 else:
-                    new_episode['original'] = n.td.nextSibling.span.text
-                new_episode['published'] = n.td.nextSibling.nextSibling.nextSibling.span.text
+                    new_episode['original'] = n.td.nextSibling.span.text.strip()
+                new_episode['published'] = n.td.nextSibling.nextSibling.nextSibling.span.text.strip()
                 episodes.append(new_episode)
             s = s.nextSibling
             if s == None:
@@ -109,6 +108,3 @@ if __name__ == "__main__":
     with open(output, "w",encoding='utf-8') as file:
         file.write(json.dumps({'genres':make_dict(genres),'authors':make_dict(authors),'actors':make_dict(actors),'statuses':make_dict(statuses),'channels':make_dict(channels),'serials':serials,'seasons':seasons,'episodes':episodes},indent=4, ensure_ascii=False))
     print(output,'was successfully written.')
-
-
-        
