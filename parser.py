@@ -35,7 +35,7 @@ if __name__ == "__main__":
             continue
         new_serial = {}
         new_serial['id']= len(serials)+1
-        new_serial['tittle'] = soup1.find('span', {'itemprop': 'name'}).text
+        new_serial['title'] = soup1.find('span', {'itemprop': 'name'}).text
         new_serial['original'] = soup1.find('span', {'itemprop': 'alternativeHeadline'}).text
         soup2 = BeautifulSoup(str(soup1.find('div',{'class':'second-part-info'})),'lxml')
         content = soup2.div.contents
@@ -45,7 +45,7 @@ if __name__ == "__main__":
                 new_serial['timing'] = content[k].replace(' - ','').strip()
             elif content[k].name == 'a':
                 if content[k].text not in genres:
-                    genres.append(content[k].text.strip())
+                    genres.append(content[k].text)
                 new_serial['genres_ids'].append(genres.index(content[k].text)+1)
         new_serial['desc'] = soup1.find('p',{'class':'body_large summary'}).text
         soup2 = BeautifulSoup(str(soup1.find('div',{'class':'content-widget-1'})),'lxml')
@@ -67,12 +67,11 @@ if __name__ == "__main__":
                 if j not in actors:
                     actors.append(j.strip())
                 new_serial['actors_ids'].append(actors.index(j)+1)
+        new_serial['channels_ids'] = []
         for ch in content[9].text.split(','):
             if ch not in channels:
                 channels.append(ch.strip())
-        new_serial['channels_ids'] = []
-        for ch in content[9].text.split(','):
-            new_serial['channels_ids'].append(channels.index(ch.strip())+1)
+            new_serial['channels_ids'].append(channels.index(ch.strip())+1)     
         if content[5].text not in statuses:
             statuses.append(content[5].text)
         new_serial['status_id'] = statuses.index(content[5].text)+1
@@ -86,14 +85,14 @@ if __name__ == "__main__":
             new_season = {}
             new_season['id'] = len(seasons)+1
             new_season['serial_id'] = len(serials)
-            new_season['tittle'] = s.h2.text.strip()
+            new_season['title'] = s.h2.text.strip()
             seasons.append(new_season)
             for n in s.findAll('tr'):
                 new_episode = {}
                 new_episode['id'] = len(episodes)+1
                 new_episode['season_id'] = len(seasons)
                 new_episode['number'] = n.a.span.text.strip()
-                new_episode['tittle'] = n.td.nextSibling.b.text.strip()
+                new_episode['title'] = n.td.nextSibling.b.text.strip()
                 if n.td.nextSibling.span == None:
                     new_episode['original'] = ''
                 else:
